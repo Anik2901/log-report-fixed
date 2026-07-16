@@ -1,0 +1,32 @@
+artifacts = ["/app/report.json"]
+
+[task]
+name = "dynamo/log-report"
+description = "Parse an Apache-style access log into a small JSON summary report."
+
+[metadata]
+category = "data_processing_and_etl"
+subcategory = "text_processing"
+task_objective = ["transform", "generate"]
+artifact_type = ["text_or_log_file", "generated_output_artifact"]
+expert_time_estimate_hours = 0.3
+model_tested = "GPT-5.4"
+agent_tested = "Terminus-2"
+difficulty_explanation = "The agent must parse an Apache-style access log at /app/access.log without a schema, correctly tokenizing each line to count total requests, distinct client IPs, and the single most-requested path, then serialize exactly those three fields to a strict JSON schema. Mistakes in field indexing, tie handling, or key naming produce a report that looks plausible but fails value-level checks."
+solution_explanation = "Read /app/access.log line by line, split each request line to extract the client IP and the requested path. Count total lines as total_requests, the number of distinct IPs as unique_ips, and the most frequent path as top_path. Write {\"total_requests\": 6, \"unique_ips\": 3, \"top_path\": \"/index.html\"} to /app/report.json. Path counts are /index.html=3, /about.html=2, /api/login=1."
+verification_explanation = "The verifier loads /app/report.json and asserts the exact values total_requests == 6, unique_ips == 3, and top_path == \"/index.html\", so a report with the right shape but wrong counts fails."
+
+[verifier]
+timeout_sec = 120.0
+
+[agent]
+timeout_sec = 120.0
+
+[environment]
+build_timeout_sec = 600.0
+cpus = 1
+memory_mb = 2048
+storage_mb = 10240
+gpus = 0
+allow_internet = true
+mcp_servers = []
